@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+dist/
+*.skill
+.DS_Store
+.zlib_dl_mirror
