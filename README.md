@@ -29,9 +29,17 @@
 - **下载即校验** — PDF 验 `%PDF` 头加 `%%EOF` 尾，epub 验 `PK\x03\x04`，mobi/azw3 验偏移 60 处的 `BOOKMOBI`
 - **零依赖** — 仅 Python 标准库，3.10+ 即可
 
+### 安装
+
+```bash
+npx skills add https://github.com/aasaa444/zlib-dl
+```
+
+或把仓库克隆到 Agent 的技能发现目录，再配好 cookie（见下）。
+
 ### 使用
 
-**作为 Agent Skill（推荐）**：`npx skills add https://github.com/aasaa444/zlib-dl`，或克隆到 Agent 的技能发现目录。配好 cookie 后直接说：
+**作为 Agent Skill（推荐）**，配好 cookie 后直接说：
 
 > 用 zlib-dl 帮我下载《信号与噪声》的 pdf
 
@@ -124,9 +132,17 @@ From a censored network, poisoned domains, rotating mirrors, and the site's SHA-
 - **Instant integrity checks** — `%PDF` header plus `%%EOF` tail, `PK\x03\x04` for epub, `BOOKMOBI` at offset 60 for mobi/azw3
 - **Zero dependencies** — Python standard library only, 3.10+
 
+### Install
+
+```bash
+npx skills add https://github.com/aasaa444/zlib-dl
+```
+
+Or clone the repo into your agent's skill discovery directory and set the cookies (below).
+
 ### Usage
 
-**As an agent skill (recommended)**: `npx skills add https://github.com/aasaa444/zlib-dl`, or clone it into your agent's skill discovery directory. With cookies configured, just say:
+**As an agent skill (recommended)**, with cookies configured, just say:
 
 > Use zlib-dl to download the PDF of "The Signal and the Noise"
 
