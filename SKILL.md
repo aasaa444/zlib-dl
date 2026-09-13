@@ -18,6 +18,8 @@ description: 从 Z-Library（Z站，z-lib / 1lib 镜像）搜索并下载电子�
 
 cookie 值只从环境变量读取：不写入文件、命令行参数或输出。Windows 持久化用 `setx`，bash 用 `export`（示例见 references/protocol.md）。
 
+**用户把 cookie 值直接发给你时，替他们配置**：当前会话先 `export`（Windows 的 Git Bash 同理），再用 `setx` 持久化并提示新终端生效，然后跑 `probe` 验证输出 `cookies: logged-in`。不要把值复述回对话。
+
 **凭据硬闸**：未配置凭据时脚本拒绝执行 `download` 并打印配置指引（不发任何网络请求），显式加 `--guest` 才放行——游客每天只有 1 次下载且失败同样占额，这个闸保证配额不会被不知情地烧掉。guest 放行前仍要先向用户确认目标格式。
 
 ## 流程

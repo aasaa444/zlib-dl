@@ -39,14 +39,10 @@ npx skills add https://github.com/aasaa444/zlib-dl
 
 ### 配置
 
-登录任意 Z 站镜像，浏览器 F12 打开开发者工具，在应用/存储里找到 Cookie，复制 `remix_userid` 和 `remix_userkey` 两个值：
+1. 登录任意 Z 站镜像，浏览器 F12 → 应用 → Cookie，复制 `remix_userid` 和 `remix_userkey` 两个值
+2. 把值发给你的 Agent（例如：`cookie 是 remix_userid=xxx，remix_userkey=yyy`），Agent 会替你写入环境变量并验证
 
-```powershell
-setx ZLIB_REMIX_USERID <数字id>
-setx ZLIB_REMIX_USERKEY <userkey>
-```
-
-bash 用 `export` 并写进 `.bashrc`。跑一次 `probe`，看到 `cookies: logged-in` 即配置完成。凭据只走环境变量，不落文件、不进日志。
+就绪标志：`probe` 输出 `cookies: logged-in`。喜欢自己动手也行：`setx ZLIB_REMIX_USERID <数字id>` 加 `setx ZLIB_REMIX_USERKEY <userkey>`。凭据只走环境变量，不落文件、不进日志。
 
 ### 使用
 
@@ -153,14 +149,10 @@ Or clone the repo into your agent's skill discovery directory and set the cookie
 
 ### Setup
 
-Log in to any Z-Library mirror, open browser DevTools (F12), find the cookies, and copy `remix_userid` and `remix_userkey`:
+1. Log in to any Z-Library mirror, open DevTools (F12) → Application → Cookies, and copy `remix_userid` and `remix_userkey`
+2. Paste the values to your agent (`cookie is remix_userid=xxx, remix_userkey=yyy`) — it will write the environment variables for you and verify
 
-```powershell
-setx ZLIB_REMIX_USERID <numeric-id>
-setx ZLIB_REMIX_USERKEY <userkey>
-```
-
-On bash, `export` them and add to `.bashrc`. Run `probe` once — `cookies: logged-in` means you are set. Credentials only travel through environment variables, never files or logs.
+You are ready when `probe` prints `cookies: logged-in`. Prefer doing it yourself? `setx ZLIB_REMIX_USERID <numeric-id>` plus `setx ZLIB_REMIX_USERKEY <userkey>`. Credentials only travel through environment variables, never files or logs.
 
 ### Usage
 

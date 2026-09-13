@@ -278,8 +278,13 @@ def verify_bytes(body, name):
 
 
 GUEST_BLOCKED = """refusing to download in guest mode: the anonymous quota is 1 download/day
-and is consumed even if the transfer later fails. Configure your Z-Library
-account instead (recommended):
+and is consumed even if the transfer later fails.
+
+If the user pasted their cookie to you, configure it yourself and retry:
+set ZLIB_REMIX_USERID / ZLIB_REMIX_USERKEY (export for this session,
+setx on Windows to persist), then run `probe` and expect "logged-in".
+
+Manual setup for the user:
 
   1. Log in at any Z-Library mirror in your browser
   2. DevTools > Application > Cookies > copy `remix_userid` and `remix_userkey`
