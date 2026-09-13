@@ -37,6 +37,17 @@ npx skills add https://github.com/aasaa444/zlib-dl
 
 或把仓库克隆到 Agent 的技能发现目录，再配好 cookie（见下）。
 
+### 配置
+
+登录任意 Z 站镜像，浏览器 F12 打开开发者工具，在应用/存储里找到 Cookie，复制 `remix_userid` 和 `remix_userkey` 两个值：
+
+```powershell
+setx ZLIB_REMIX_USERID <数字id>
+setx ZLIB_REMIX_USERKEY <userkey>
+```
+
+bash 用 `export` 并写进 `.bashrc`。跑一次 `probe`，看到 `cookies: logged-in` 即配置完成。凭据只走环境变量，不落文件、不进日志。
+
 ### 使用
 
 **作为 Agent Skill（推荐）**，配好 cookie 后直接说：
@@ -139,6 +150,17 @@ npx skills add https://github.com/aasaa444/zlib-dl
 ```
 
 Or clone the repo into your agent's skill discovery directory and set the cookies (below).
+
+### Setup
+
+Log in to any Z-Library mirror, open browser DevTools (F12), find the cookies, and copy `remix_userid` and `remix_userkey`:
+
+```powershell
+setx ZLIB_REMIX_USERID <numeric-id>
+setx ZLIB_REMIX_USERKEY <userkey>
+```
+
+On bash, `export` them and add to `.bashrc`. Run `probe` once — `cookies: logged-in` means you are set. Credentials only travel through environment variables, never files or logs.
 
 ### Usage
 
