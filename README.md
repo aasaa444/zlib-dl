@@ -1,68 +1,89 @@
 <div align="center">
 
-# zlib-dl
+# 📥 zlib-dl
 
-从 Z-Library（Z站）搜索并下载电子书的 Agent Skill，为国内网络环境设计
-
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-brightgreen)
-
-[English](#english) | 简体中文
+[简体中文](#-简体中文) | [English](#-english)
 
 </div>
 
+> 从 Z-Library（Z站）搜索并下载电子书的 Agent Skill。镜像发现、反爬质询、配额纪律，全部自动化。
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-brightgreen)](scripts/zlib_dl.py)
+[![Agent Skill](https://img.shields.io/badge/Agent-Skill-success)](SKILL.md)
+
 ---
 
-## 实际效果
+## ⚠️ 简体中文
 
-```text
-$ python scripts/zlib_dl.py search "信号与噪声" --ext pdf --limit 3
-21 result(s):
-  1. [PDF ]   21.72 MB  Chinese  2013 rating=0.0 信号与噪声大数据时代预测的科学与艺术
-     dl: /dl/gmePQdPbXa    /book/K5npJPpmzV/信号与噪声大数据时代预测的科学与艺术.html
-  2. [PDF ]    6.55 MB  Chinese  2013 rating=5.0 信号与噪声大数据时代预测的科学与艺术
-     dl: /dl/xXoZRN3Ln6    /book/r9bbapM79B/信号与噪声大数据时代预测的科学与艺术.html
-  3. [PDF ]    8.36 MB  Chinese  2013 rating=0.0 信号与噪声大数据时代预测的科学与艺术
-     dl: /dl/wXbyJdOJnY    /book/nz2wNpmNqb/信号与噪声大数据时代预测的科学与艺术.html
+**本项目仅供个人学习、研究与技术演示。请严格遵守所在地区法律法规与版权条款，仅用于：**
+
+- ✅ 你有合法权限访问的资源
+- ✅ 公版或开放许可的文档（如古登堡计划、arXiv）
+- ✅ 你本人拥有或获授权的内容
+
+**作者不鼓励任何形式的版权侵权，不承担相关法律责任，使用风险自负。请尊重知识产权，支持正版！**
+
+---
+
+### ✨ 特性
+
+- 🔍 **镜像自动发现** — 从 GitHub 的 [Awesome-Zlibrary](https://github.com/dongyubin/Awesome-Zlibrary) 仓库读最新可用镜像，跟随重定向锁定真实后端，DNS 污染、域名轮换都不用管
+- 🧩 **质询自动破解** — 站点的 SHA1 反爬质询在本地穷举求解（约 6.5 万次尝试，毫秒级），503 反复出现也自动重试
+- 🪙 **配额纪律** — 无凭据时拒绝下载并打印配置指引（零网络请求）；凭据齐全时每次下载恰好只发一次请求
+- 🥇 **默认 PDF** — 下载后自动校验完整性：PDF 校验 `%PDF` 头 + `%%EOF` 尾，epub 校验 `PK\x03\x04`，mobi/azw3 校验偏移 60 处的 `BOOKMOBI`
+- 📦 **零依赖** — 仅用 Python 标准库，装个 3.10+ 就能跑
+- 🔄 **改版可跟** — 站点结构变了（结果条目换成 `<z-bookcard>` 组件、书页改 SPA）不用慌，[协议文档](references/protocol.md)记了应对方法
+
+### 🎯 作为 Agent Skill 使用（推荐）
+
+**安装**：克隆到 Agent 的技能发现目录，或一行命令：
+
+```bash
+npx skills add https://github.com/aasaa444/zlib-dl
 ```
 
-挑一条 `dl:` 令牌，一条命令下载，脚本自动校验文件完整性。
+手动方式：
 
-## 它处理的问题
+```bash
+git clone https://github.com/aasaa444/zlib-dl.git ~/.agents/skills/zlib-dl   # 路径按你的宿主调整
+```
 
-国内网络下从 Z 站拿书有几道坎。主域名被 DNS 污染，nslookup 和 DoH 都解析到假 IP；镜像域名隔三差五轮换，硬编码必死；站点在应用层之前挡了一道 SHA1 反爬质询；游客每天只能下 1 本，免费账号 10 本，配额金贵。
+**使用**：配好 cookie 后，直接对 Agent 说：
 
-| 道坎 | 处理方式 |
-|---|---|
-| 镜像不可达 | `probe` 从 GitHub 仓库 [Awesome-Zlibrary](https://github.com/dongyubin/Awesome-Zlibrary) 读最新可用镜像（走 `api.github.com`），跟随重定向拿到真实后端，缓存到 `~/.zlib_dl_mirror` |
-| SHA1 质询 | 解析质询页的混淆 JS，本地穷举工作量证明（约 6.5 万次尝试，毫秒级），写回 `c_token`/`c_time` 两个 cookie 自动重试 |
-| 站点改版 | 结果条目一夜之间从 `<a>` 换成 `<z-bookcard>` 组件这种事发生过。[references/protocol.md](references/protocol.md) 记了两代结构的解析方法和排查思路 |
-| 配额浪费 | 无凭据时 `download` 拒绝执行并打印配置指引（零网络请求）；凭据齐全时整个下载恰好只发一次请求，服务端返回网页就停下报告 |
+```text
+用 zlib-dl 帮我下载《信号与噪声》的 pdf
+```
 
-## 安装
+Agent 会自动完成：
 
-两种装法，任选其一：
+- ✅ 探测可达镜像（免费）
+- ✅ 搜索并列出可用版本和格式（免费）
+- ✅ 向你确认要哪一条（配额纪律）
+- ✅ 下载并校验文件完整性
 
-- 把仓库地址交给 Agent，让它克隆进自己的技能发现目录
-- 或 `npx skills add <仓库地址>`
+### 🔧 配置（一次性）
 
-要求 Python 3.10+。脚本只用标准库，没有第三方依赖。
-
-## 配置
-
-登录任意 Z 站镜像，从浏览器开发者工具的 cookie 里取 `remix_userid` 和 `remix_userkey`，写进环境变量：
+登录任意 Z 站镜像，从浏览器开发者工具的 cookie 里取 `remix_userid` 和 `remix_userkey`：
 
 ```powershell
 setx ZLIB_REMIX_USERID <数字id>
 setx ZLIB_REMIX_USERKEY <userkey>
 ```
 
-bash 用 `export`，写进 `.bashrc` 持久。也支持 `ZLIB_COOKIE`（整串 cookie，优先级更高）和 `ZLIB_MIRROR`（固定镜像地址）。凭据只走环境变量，不落文件、不进日志。
+| 变量 | 必要性 | 说明 |
+|---|---|---|
+| `ZLIB_REMIX_USERID` | 登录必需 | 账号数字 id（cookie `remix_userid`） |
+| `ZLIB_REMIX_USERKEY` | 登录必需 | 会话密钥（cookie `remix_userkey`） |
+| `ZLIB_COOKIE` | 可选 | 整串 cookie，优先级更高 |
+| `ZLIB_MIRROR` | 可选 | 固定镜像地址，跳过自动发现 |
 
-未配置凭据时 `probe` 和 `search` 照常能跑，`download` 会被拒绝并打印上面的配置指引。确要动用游客那次下载，显式加 `--guest`。
+凭据只走环境变量，不落文件、不进日志。配好后 `probe` 会显示 `cookies: logged-in`。
 
-## 使用
+### 🛠️ 手动命令行
+
+不想走 Agent 也可以直接用：
 
 ```bash
 python scripts/zlib_dl.py probe                                 # 发现并验证镜像（免费）
@@ -71,38 +92,7 @@ python scripts/zlib_dl.py download "/dl/<令牌>" --name 书名     # 下载（�
 python scripts/zlib_dl.py verify 书名.pdf                       # 完整性校验
 ```
 
-下载令牌来自 search 输出的 `dl:` 行。每次 `download` 恰好发出一次请求，服务端返回网页说明配额用尽或会话失效，脚本会停下报告而不是盲目重试。保存后自动校验：PDF 要 `%PDF` 头加结尾的 `%%EOF`，epub 要 `PK\x03\x04`，mobi/azw3 看偏移 60 处的 `BOOKMOBI`。
-
-## 配额与数据边界
-
-| 身份 | 每日下载 |
-|---|---|
-| 游客 | 1 次，失败也占额 |
-| 免费注册账号 | 10 次 |
-
-`probe` 和 `search` 不消耗配额。脚本只与两方通信：GitHub（读镜像表）和 Z-Library 镜像，搜索词会经过这两方。
-
-## 兼容范围
-
-在国内裸网络（无代理、Windows 10）实测通过：镜像发现、质询破解、搜索、下载、校验全流程。Linux/macOS 代码路径相同，未实测。镜像域名由第三方仓库维护，轮换属正常现象，缓存失效删掉 `~/.zlib_dl_mirror` 重跑 `probe` 即可。
-
-## 免责声明
-
-本项目仅供个人学习与技术研究。请遵守所在地区法律法规，尊重作者版权，支持正版。项目与 Z-Library 官方无任何关联，不对第三方服务的可用性负责，请合理控制请求频率。
-
-## License
-
-[MIT](./LICENSE) © aasaa444
-
----
-
-<div align="center">
-
-## English
-
-</div>
-
-## What it looks like
+### 📖 实际输出
 
 ```text
 $ python scripts/zlib_dl.py search "信号与噪声" --ext pdf --limit 3
@@ -115,66 +105,187 @@ $ python scripts/zlib_dl.py search "信号与噪声" --ext pdf --limit 3
      dl: /dl/wXbyJdOJnY    /book/nz2wNpmNqb/信号与噪声大数据时代预测的科学与艺术.html
 ```
 
-Pick a `dl:` token, run one command, and the script saves the file and checks its integrity.
+未配 cookie 就想下载？配额闸会拦住你：
 
-## The problems it handles
-
-Getting a book off Z-Library from a censored network means dealing with a few obstacles. The main domains are DNS-poisoned, so both nslookup and DoH resolve to fake IPs. Mirror domains rotate every few weeks, so hardcoding them never survives. The site sits behind a SHA-1 proof-of-work gate before the application layer even answers. And downloads are scarce: 1 per day for guests, 10 per day for a free account.
-
-| Obstacle | How it is handled |
-|---|---|
-| Unreachable mirrors | `probe` reads the latest working mirrors from the [Awesome-Zlibrary](https://github.com/dongyubin/Awesome-Zlibrary) GitHub repo (via `api.github.com`), follows redirects to the real backend, and caches the result in `~/.zlib_dl_mirror` |
-| SHA-1 PoW gate | Parses the obfuscated challenge page, solves the proof of work locally (~65k hash attempts, milliseconds), writes back the `c_token`/`c_time` cookies and retries automatically |
-| Site redesigns | The result entries once switched from `<a>` tags to `<z-bookcard>` components overnight. [references/protocol.md](references/protocol.md) documents both parsers and the debugging playbook |
-| Wasted quota | Without credentials, `download` refuses to run and prints setup instructions (zero network requests); with credentials, each download sends exactly one request and stops on any HTML response instead of retrying blindly |
-
-## Install
-
-Either hand the repo URL to your agent and have it clone the folder into its skill discovery directory, or run `npx skills add <repo-url>`.
-
-Requires Python 3.10+. The script uses only the standard library.
-
-## Setup
-
-Log in to any Z-Library mirror, open browser DevTools, and copy `remix_userid` and `remix_userkey` from the cookies:
-
-```powershell
-setx ZLIB_REMIX_USERID <numeric-id>
-setx ZLIB_REMIX_USERKEY <userkey>
+```text
+$ python scripts/zlib_dl.py download "/dl/gmePQdPbXa" --name test
+refusing to download in guest mode: the anonymous quota is 1 download/day
+and is consumed even if the transfer later fails. Configure your Z-Library
+account instead (recommended):
+  1. Log in at any Z-Library mirror in your browser
+  2. DevTools > Application > Cookies > copy `remix_userid` and `remix_userkey`
+  ...
 ```
 
-On bash use `export` and put it in `.bashrc`. Two optional variables: `ZLIB_COOKIE` (a full cookie string, takes precedence) and `ZLIB_MIRROR` (pin a mirror). Credentials only travel through environment variables — they are never written to files or logs.
+### 🔄 工作流程
 
-Without credentials, `probe` and `search` still work as guest, and `download` refuses to run while printing the instructions above. To spend the single guest download on purpose, pass `--guest`.
+```text
+"帮我下载《信号与噪声》pdf"
+        ↓
+1. probe：GitHub 镜像表 → 可达后端（缓存到 ~/.zlib_dl_mirror）
+        ↓
+2. search：结果按 格式 / 大小 / 年份 / 评分 列出，附 /dl/ 下载令牌
+        ↓
+3. 你确认要哪一条（默认 PDF，不浪费配额）
+        ↓
+4. download：GET /dl/<令牌>，恰好一次请求
+   - 返回文件流 → 保存
+   - 返回网页 → 配额用尽或会话失效，停下报告
+        ↓
+5. verify：魔数 + EOF 校验 ✅
+```
 
-## Usage
+### 📁 项目结构
+
+```text
+zlib-dl/
+├── SKILL.md                  # Agent 主流程（技能触发后读这个）
+├── README.md                 # 本文件
+├── LICENSE                   # MIT
+├── scripts/
+│   └── zlib_dl.py            # probe / search / download / verify 四个子命令
+└── references/
+    └── protocol.md           # 质询协议逆向、DNS 污染诊断、站点改版应对
+```
+
+### 📊 配额与限制
+
+| 身份 | 每日下载 | 说明 |
+|---|---|---|
+| 游客 | 1 次 | 失败也占额，`--guest` 显式放行 |
+| 免费注册账号 | 10 次 | 推荐，两个 cookie 即登录态 |
+
+- `probe` 和 `search` 不消耗配额，随便跑
+- 为什么默认 PDF？配额金贵，PDF 一次就够；epub/mobi/azw3 都在搜索结果里，点名即下
+- 脚本只与两方通信：GitHub（读镜像表）和 Z-Library 镜像，搜索词会经过这两方
+- 兼容范围：国内裸网络（无代理、Windows 10）全流程实测通过；Linux/macOS 代码路径相同，未实测
+
+### 📝 命令参考
+
+| 命令 | 作用 | 配额 |
+|---|---|---|
+| `probe` | 发现镜像 → 解质询 → 验证通路，缓存到 `~/.zlib_dl_mirror` | 免费 |
+| `search <词> [--ext pdf] [--lang 中文] [--limit 15]` | 搜书，输出格式/大小/令牌 | 免费 |
+| `download <令牌或书页> [--out 目录] [--name 名字] [--guest]` | 下载单个文件并校验 | 消耗 1 次 |
+| `verify <文件>` | 校验已下载文件的完整性 | 免费 |
+
+## 🤝 贡献
+
+欢迎 Issue 和 PR。改动请保持两条底线：仅用标准库、配额纪律的默认行为不被削弱。
+
+## 📄 许可
+
+[MIT](./LICENSE) © aasaa444
+
+---
+
+<div align="center">
+
+# 📥 zlib-dl
+
+## 🌐 English
+
+</div>
+
+> An Agent Skill to search and download ebooks from Z-Library. Mirror discovery, anti-bot gate solving, and quota discipline — all automated.
+
+**This project is for personal study, research, and technical demonstration only. Comply with the laws of your jurisdiction and respect copyright. Use only with:**
+
+- ✅ Resources you have legal access to
+- ✅ Public domain or openly licensed documents (e.g., Project Gutenberg, arXiv)
+- ✅ Content you own or are authorized to use
+
+**The author does not encourage copyright infringement in any form and assumes no liability. Use at your own risk. Support official releases!**
+
+### ✨ Features
+
+- 🔍 **Automatic mirror discovery** — reads the latest working mirrors from the [Awesome-Zlibrary](https://github.com/dongyubin/Awesome-Zlibrary) GitHub repo and follows redirects to the real backend; DNS poisoning and domain rotation are handled for you
+- 🧩 **PoW-gate solving** — the site's SHA-1 proof-of-work challenge is solved locally (~65k hash attempts, milliseconds) and 503s are retried automatically
+- 🪙 **Quota discipline** — without credentials, `download` refuses and prints setup instructions (zero network requests); with credentials, each download sends exactly one request
+- 🥇 **PDF by default** — integrity checks after every download: `%PDF` header + `%%EOF` tail for PDF, `PK\x03\x04` for epub, `BOOKMOBI` at offset 60 for mobi/azw3
+- 📦 **Zero dependencies** — Python standard library only, 3.10+ is all you need
+- 🔄 **Redesign-resilient** — when the site changes (results became `<z-bookcard>` components, book pages became SPAs), the [protocol notes](references/protocol.md) document what to do
+
+### 🎯 Use as an Agent Skill (Recommended)
+
+**Install** — clone into your agent's skill discovery directory, or:
 
 ```bash
-python scripts/zlib_dl.py probe                                  # find and verify a mirror (free)
-python scripts/zlib_dl.py search "book title" --ext pdf          # search (free)
-python scripts/zlib_dl.py download "/dl/<token>" --name book     # download (consumes quota)
-python scripts/zlib_dl.py verify book.pdf                        # integrity check
+npx skills add https://github.com/aasaa444/zlib-dl
 ```
 
-Download tokens come from the `dl:` line in search output. Each `download` sends exactly one request; an HTML response means the quota is gone or the session expired, and the script stops and reports instead of retrying. Saved files are verified automatically: PDF needs a `%PDF` header plus a trailing `%%EOF`, epub needs `PK\x03\x04`, mobi/azw3 needs `BOOKMOBI` at offset 60.
+**Use** — with cookies configured, just tell your agent:
 
-## Quota and data boundaries
+```text
+Use zlib-dl to download the PDF of "The Signal and the Noise"
+```
 
-| Identity | Downloads per day |
-|---|---|
-| Guest | 1, burned even on failure |
-| Free account | 10 |
+The agent will:
 
-`probe` and `search` cost nothing. The script talks to exactly two parties: GitHub (the mirror list) and the Z-Library mirror; your search terms pass through both.
+- ✅ Probe a reachable mirror (free)
+- ✅ Search and list available editions and formats (free)
+- ✅ Confirm which one you want (quota discipline)
+- ✅ Download and verify integrity
 
-## Compatibility
+### 🔧 Setup (one-time)
 
-Tested end to end on an unproxied Windows 10 connection inside mainland China: mirror discovery, gate solving, search, download, integrity checks. The Linux/macOS code paths are identical but untested. Mirror domains are maintained by a third-party repo and rotating is normal; if the cache goes stale, delete `~/.zlib_dl_mirror` and run `probe` again.
+Log in to any Z-Library mirror, open browser DevTools, and copy `remix_userid` and `remix_userkey` from the cookies into environment variables (see the table above). Credentials only travel through environment variables — never written to files or logs. `probe` should print `cookies: logged-in` when done.
 
-## Disclaimer
+### 🛠️ Manual CLI
 
-This project is for personal study and technical research only. Follow the laws of your jurisdiction, respect authors' rights, and buy books when you can. Not affiliated with Z-Library, no warranty for third-party availability, and please keep request rates reasonable.
+```bash
+python scripts/zlib_dl.py probe                                 # find and verify a mirror (free)
+python scripts/zlib_dl.py search "title" --ext pdf              # search (free)
+python scripts/zlib_dl.py download "/dl/<token>" --name book    # download (uses quota)
+python scripts/zlib_dl.py verify book.pdf                       # integrity check
+```
 
-## License
+### 📖 Real output
+
+```text
+$ python scripts/zlib_dl.py search "信号与噪声" --ext pdf --limit 3
+21 result(s):
+  1. [PDF ]   21.72 MB  Chinese  2013 rating=0.0 信号与噪声大数据时代预测的科学与艺术
+     dl: /dl/gmePQdPbXa    /book/K5npJPpmzV/信号与噪声大数据时代预测的科学与艺术.html
+  2. [PDF ]    6.55 MB  Chinese  2013 rating=5.0 信号与噪声大数据时代预测的科学与艺术
+     dl: /dl/xXoZRN3Ln6    /book/r9bbapM79B/信号与噪声大数据时代预测的科学与艺术.html
+```
+
+Without credentials, the quota gate blocks downloads and prints instructions instead of burning the guest attempt.
+
+### 🔄 Workflow
+
+```text
+"download this book"
+        ↓
+1. probe: GitHub mirror list → reachable backend (cached in ~/.zlib_dl_mirror)
+        ↓
+2. search: results with format / size / year / rating + /dl/ tokens
+        ↓
+3. you confirm which one (PDF by default, quota intact)
+        ↓
+4. download: GET /dl/<token>, exactly one request
+   - file stream → saved
+   - web page → quota gone or session invalid, stop and report
+        ↓
+5. verify: magic bytes + EOF ✅
+```
+
+### 📊 Quota and limits
+
+| Identity | Downloads/day | Notes |
+|---|---|---|
+| Guest | 1 | burned even on failure; `--guest` to override |
+| Free account | 10 | recommended — two cookies give you login |
+
+- `probe` and `search` cost nothing
+- The script talks to exactly two parties: GitHub (mirror list) and the Z-Library mirror; search terms pass through both
+- Compatibility: fully tested end to end on an unproxied Windows 10 connection in mainland China; Linux/macOS paths are identical but untested
+
+### 🤝 Contributing
+
+Issues and PRs welcome. Please keep two baselines: standard library only, and the default quota-discipline behavior intact.
+
+### 📄 License
 
 [MIT](./LICENSE) © aasaa444
