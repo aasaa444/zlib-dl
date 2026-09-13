@@ -148,7 +148,7 @@ zlib-dl/
     └── protocol.md           # 质询协议逆向、DNS 污染诊断、站点改版应对
 ```
 
-### 📊 配额与限制
+### 📊 配额与数据边界
 
 | 身份 | 每日下载 | 说明 |
 |---|---|---|
@@ -271,7 +271,7 @@ Without credentials, the quota gate blocks downloads and prints instructions ins
 5. verify: magic bytes + EOF ✅
 ```
 
-### 📊 Quota and limits
+### 📊 Quota, data & privacy
 
 | Identity | Downloads/day | Notes |
 |---|---|---|
