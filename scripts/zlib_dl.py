@@ -305,6 +305,13 @@ def cmd_download(args):
     target = args.target
     if target.startswith("http"):
         target = urllib.parse.urlparse(target).path
+    # MSYS/Git Bash rewrites a leading "/dl/..." argument into a Windows path
+    # (e.g. C:/Program Files/Git/dl/xxx); recover the token from the mangled form
+    m = re.search(r"(?:^|[\\/])dl[\\/]([A-Za-z0-9]+)$", target)
+    if m and not target.startswith("/dl/"):
+        target = "/dl/" + m.group(1)
+    if re.fullmatch(r"[A-Za-z0-9]+", target):  # bare token id also accepted
+        target = "/dl/" + target
     if target.startswith("/dl/"):
         dl_url = target  # token straight from search output (z-bookcard download attr)
     elif target.startswith("/book/"):
